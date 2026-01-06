@@ -10,8 +10,18 @@ def donate():
     user_id = data.get("user_id")
     amount = data.get("amount")
 
+    # basic validation
     if not user_id or not amount:
         return jsonify({"message": "Invalid data"}), 400
+
+    # 🔒 AMOUNT LIMIT CHECK (TEST MODE)
+    try:
+        amount = int(amount)
+    except:
+        return jsonify({"message": "Invalid amount"}), 400
+
+    if amount < 2:
+        return jsonify({"message": "Minimum donation amount is ₹2"}), 400
 
     add_donation(user_id, amount)
     return jsonify({"message": "Donation saved successfully"})
