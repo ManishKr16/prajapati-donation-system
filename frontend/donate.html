@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Prajapati Club Donation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    font-family: Arial;
+    background: #f4f4f4;
+    padding: 20px;
+}
+.card {
+    max-width: 400px;
+    background: white;
+    margin: auto;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+input, button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    font-size: 16px;
+}
+button {
+    background: green;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+.error {
+    color: red;
+}
+#qrBox {
+    margin-top: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+    <h2>🙏 Donate to Prajapati Club</h2>
+
+    <input type="text" id="name" placeholder="Your Name">
+    <input type="number" id="amount" placeholder="Amount (Min ₹151)">
+
+    <button onclick="payNow()">Pay Now</button>
+
+    <p class="error" id="error"></p>
+
+    <div id="qrBox"></div>
+</div>
+
+<script>
+function payNow() {
+    const name = document.getElementById("name").value.trim();
+    const amount = parseInt(document.getElementById("amount").value);
+
+    if (!name || !amount) {
+        document.getElementById("error").innerText = "All fields required";
+        return;
+    }
+
+    if (amount < 151) {
+        document.getElementById("error").innerText = "Minimum donation is ₹151";
+        return;
+    }
+
+    const upiId = "8862966605@ibl";
+    const note = "Donation - Prajapati Club";
+    const upiUrl =
+        `upi://pay?pa=${upiId}&pn=Prajapati Club&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+
+    // Mobile → UPI app open
+    if (/Android|iPhone/i.test(navigator.userAgent)) {
+        window.location.href = upiUrl;
+    } 
+    // Desktop → QR code
+    else {
+        const qr = `
+        <h3>Scan & Pay</h3>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiUrl)}">
+        `;
+        document.getElementById("qrBox").innerHTML = qr;
+    }
+}
+</script>
+
+</body>
+</html>

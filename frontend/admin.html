@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Dashboard | Prajapati Club</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- 🔐 ADMIN LOGIN PROTECTION -->
+<script>
+if (localStorage.getItem("admin_logged_in") !== "true") {
+  window.location.href = "admin_login.html";
+}
+</script>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+  padding: 20px;
+}
+
+.card {
+  background: #fff;
+  max-width: 950px;
+  margin: auto;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+h2 {
+  color: #b11226;
+  text-align: center;
+}
+
+select, input, button {
+  padding: 10px;
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+button {
+  background: #b11226;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button.logout {
+  background: #333;
+  float: right;
+}
+
+button.download {
+  background: green;
+  margin-right: 10px;
+}
+
+.summary {
+  margin-top: 15px;
+  font-size: 18px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+}
+
+th {
+  background: #eee;
+}
+
+hr {
+  margin: 20px 0;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <!-- LOGOUT -->
+  <button class="logout" onclick="logout()">Logout</button>
+
+  <h2>📊 Admin Dashboard</h2>
+  <p style="text-align:center;">Prajapati Club – Lashkarganj</p>
+
+  <!-- YEAR SELECTOR -->
+  <label><b>Select Year:</b></label>
+  <select id="year" onchange="loadAll()">
+    <option value="2026">2026</option>
+    <option value="2027">2027</option>
+    <option value="2028">2028</option>
+    <option value="2029">2029</option>
+  </select>
+
+  <!-- SUMMARY -->
+  <div class="summary">
+    💰 Total Donation: ₹ <span id="donation">0</span><br>
+    🧾 Total Expense: ₹ <span id="expense">0</span><br>
+    ✅ <b>Balance: ₹ <span id="balance">0</span></b>
+  </div>
+
+  <!-- DOWNLOAD -->
+  <hr>
+  <button class="download" onclick="downloadCSV()">⬇️ Download Excel</button>
+  <button class="download" onclick="downloadPDF()">⬇️ Download PDF</button>
+
+  <!-- ADD EXPENSE -->
+  <hr>
+  <h3>Add Expense</h3>
+  <input type="text" id="expenseTitle" placeholder="Expense Title">
+  <input type="number" id="expenseAmount" placeholder="Amount">
+  <br>
+  <button onclick="addExpense()">Add Expense</button>
+
+  <!-- DONATION LIST -->
+  <hr>
+  <h3>Donation List</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Amount (₹)</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody id="donationTable"></tbody>
+  </table>
+
+</div>
+
+<script>
+/* LOGOUT */
+function logout() {
+  localStorage.removeItem("admin_logged_in");
+  window.location.href = "admin_login.html";
+}
+
+/* LOAD SUMMARY + LIST */
+function loadAll() {
+  const year = document.getElementById("year").value;
+
+  // Summary
+  fetch(`http://127.0.0.1:5000/admin/summary/${year}`)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("donation").innerText = data.total_donation;
+      document.getElementById("expense").innerText = data.total_expense;
+      document.getElementById("balance").innerText = data.balance;
+    });
+
+  // Donation list
+  fetch(`http://127.0.0.1:5000/admin/donations/year?year=${year}`)
+    .then(res => res.json())
+    .then(data => {
+      const table = document.getElementById("donationTable");
+      table.innerHTML = "";
+
+      data.donations.forEach(d => {
+        table.innerHTML += `
+          <tr>
+            <td>${d.name}</td>
+            <td>₹${d.amount}</td>
+            <td>${new Date(d.date).toLocaleString()}</td>
+          </tr>`;
+      });
+    });
+}
+
+/* ADD EXPENSE */
+function addExpense() {
+  const title = document.getElementById("expenseTitle").value;
+  const amount = Number(document.getElementById("expenseAmount").value);
+  const year = Number(document.getElementById("year").value);
+
+  if (!title || !amount) {
+    alert("Enter expense details");
+    return;
+  }
+
+  fetch("http://127.0.0.1:5000/admin/expense/add", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      title: title,
+      amount: amount,
+      year: year
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert(data.message);
+    document.getElementById("expenseTitle").value = "";
+    document.getElementById("expenseAmount").value = "";
+    loadAll();
+  });
+}
+
+/* DOWNLOADS */
+function downloadCSV() {
+  const year = document.getElementById("year").value;
+  window.open(`http://127.0.0.1:5000/admin/report/csv/${year}`);
+}
+
+function downloadPDF() {
+  const year = document.getElementById("year").value;
+  window.open(`http://127.0.0.1:5000/admin/report/pdf/${year}`);
+}
+
+/* LOAD DEFAULT */
+loadAll();
+</script>
+
+</body>
+</html>

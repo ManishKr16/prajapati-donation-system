@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body { font-family: Arial; background: #f4f4f4; padding: 40px; }
+.card { background: white; max-width: 320px; margin: auto; padding: 20px; border-radius: 10px; }
+input, button { width: 100%; padding: 10px; margin-top: 10px; }
+button { background: #b11226; color: white; border: none; }
+</style>
+</head>
+
+<body>
+<div class="card">
+  <h3>Admin Login</h3>
+  <input id="username" placeholder="Username">
+  <input id="password" type="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+</div>
+
+<script>
+function login() {
+  fetch("http://127.0.0.1:5000/admin/login", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      username: document.getElementById("username").value,
+      password: document.getElementById("password").value
+    })
+  })
+  .then(res => {
+    if (!res.ok) throw Error();
+    return res.json();
+  })
+  .then(() => {
+    localStorage.setItem("admin_logged_in", "true");
+    window.location.href = "admin.html";
+  })
+  .catch(() => alert("Invalid credentials"));
+}
+</script>
+</body>
+</html>
