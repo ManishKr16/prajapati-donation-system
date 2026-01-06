@@ -1,91 +1,94 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Prajapati Club Donation</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<style>
-body {
-    font-family: Arial;
-    background: #f4f4f4;
-    padding: 20px;
-}
-.card {
-    max-width: 400px;
-    background: white;
-    margin: auto;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-}
-input, button {
-    width: 100%;
-    padding: 12px;
-    margin-top: 10px;
-    font-size: 16px;
-}
-button {
-    background: green;
-    color: white;
-    border: none;
-    cursor: pointer;
-}
-.error {
-    color: red;
-}
-#qrBox {
-    margin-top: 15px;
-}
-</style>
+  <meta charset="UTF-8">
+  <title>Prajapati Club Donation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial;
+      background: #f4f4f4;
+      text-align: center;
+      padding: 30px;
+    }
+    .card {
+      background: white;
+      padding: 25px;
+      max-width: 400px;
+      margin: auto;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      font-size: 16px;
+    }
+    button {
+      background: green;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: gray;
+    }
+  </style>
 </head>
-
 <body>
 
 <div class="card">
-    <h2>🙏 Donate to Prajapati Club</h2>
+  <h2>🙏 Donate to Prajapati Club</h2>
 
-    <input type="text" id="name" placeholder="Your Name">
-    <input type="number" id="amount" placeholder="Amount (Min ₹151)">
+  <input type="number" id="amount" placeholder="Enter amount (Min ₹151)">
 
-    <button onclick="payNow()">Pay Now</button>
+  <button onclick="payNow()">Pay Now</button>
 
-    <p class="error" id="error"></p>
-
-    <div id="qrBox"></div>
+  <p id="msg" style="color:red;"></p>
 </div>
 
 <script>
 function payNow() {
-    const name = document.getElementById("name").value.trim();
-    const amount = parseInt(document.getElementById("amount").value);
+  const amount = document.getElementById("amount").value;
+  const msg = document.getElementById("msg");
 
-    if (!name || !amount) {
-        document.getElementById("error").innerText = "All fields required";
-        return;
-    }
+  if (!amount || amount < 151) {
+    msg.innerText = "Minimum donation amount is ₹151";
+    return;
+  }
 
-    if (amount < 151) {
-        document.getElementById("error").innerText = "Minimum donation is ₹151";
-        return;
-    }
+  const upiId = "8862966605@ibl"; // 👈 apna UPI ID daalna
+  const name = "Prajapati Club";
+  const note = "Donation";
 
-    const upiId = "8862966605@ibl";
-    const note = "Donation - Prajapati Club";
-    const upiUrl =
-        `upi://pay?pa=${upiId}&pn=Prajapati Club&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+  const upiURL =
+    `upi://pay?pa=${upiId}&pn=${name}&am=${amount}&cu=INR&tn=${note}`;
 
-    // Mobile → UPI app open
-    if (/Android|iPhone/i.test(navigator.userAgent)) {
-        window.location.href = upiUrl;
-    } 
-    // Desktop → QR code
-    else {
-        const qr = `
-        <h3>Scan & Pay</h3>
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiUrl)}">
-        `;
-        document.getElementById("qrBox").innerHTML = qr;
-    }
+  window.location.href = upiURL;
+
+  // After redirect (assume success)
+  setTimeout(() => {
+    saveDonation(amount);
+  }, 3000);
+}
+
+function saveDonation(amount) {
+  fetch("https://prajapati-donation-system.onrender.com/donate", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      user_id: "guest",
+      amount: amount
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert("Thank you! Donation successful.");
+    window.location.href = "success.html";
+  });
 }
 </script>
 

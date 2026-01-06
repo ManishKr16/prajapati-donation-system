@@ -9,8 +9,8 @@ function payNow() {
   const amount = Number(document.getElementById("amount").value);
 
   // 🔒 Minimum amount check
-  if (!amount || amount < 151) {
-    alert("❌ Minimum donation amount is ₹151");
+  if (!amount || amount < 2) {
+    alert("❌ Minimum donation amount is ₹2");
     return;
   }
 
