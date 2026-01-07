@@ -41,7 +41,7 @@
 <div class="card">
   <h2>🙏 Donate to Prajapati Club</h2>
 
-  <input type="number" id="amount" placeholder="Enter amount (Min ₹151)">
+  <input type="number" id="amount" placeholder="Enter amount (Min ₹2)">
 
   <button onclick="payNow()">Pay Now</button>
 
@@ -53,8 +53,8 @@ function payNow() {
   const amount = document.getElementById("amount").value;
   const msg = document.getElementById("msg");
 
-  if (!amount || amount < 151) {
-    msg.innerText = "Minimum donation amount is ₹151";
+  if (!amount || amount < 2) {
+    msg.innerText = "Minimum donation amount is ₹2";
     return;
   }
 
